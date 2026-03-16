@@ -1,52 +1,71 @@
 Vagrant.configure("2") do |config|
-  # Set up Libvirt provider settings
-  config.vm.provider "libvirt" do |libvirt|
-    libvirt.driver = "qemu"  # Force software emulation
-    libvirt.nic_model_type = "virtio"  # Use virtio network interface
-	  libvirt.memory = 1600
-    libvirt.cpus   = 2
-  end
-
-  # Enable host manager settings
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
 
-  # Define web01
+### DB VM ###
+  config.vm.define "db01" do |db01|
+    db01.vm.box = "centos/stream9"
+    db01.vm.hostname = "db01"
+    db01.vm.network "private_network", ip: "192.168.56.15"
+
+    db01.vm.provider :libvirt do |lv|
+      lv.driver = "qemu"
+      lv.memory = 600
+      lv.cpus = 1
+    end
+  end
+
+### Memcache VM ###
+  config.vm.define "mc01" do |mc01|
+    mc01.vm.box = "centos/stream9"
+    mc01.vm.hostname = "mc01"
+    mc01.vm.network "private_network", ip: "192.168.56.14"
+
+    mc01.vm.provider :libvirt do |lv|
+      lv.driver = "qemu"
+      lv.memory = 600
+      lv.cpus = 1
+    end
+  end
+
+### RabbitMQ VM ###
+  config.vm.define "rmq01" do |rmq01|
+    rmq01.vm.box = "centos/stream9"
+    rmq01.vm.hostname = "rmq01"
+    rmq01.vm.network "private_network", ip: "192.168.56.13"
+
+    rmq01.vm.provider :libvirt do |lv|
+      lv.driver = "qemu"
+      lv.memory = 600
+      lv.cpus = 1
+    end
+  end
+
+### Tomcat VM ###
+  config.vm.define "app01" do |app01|
+    app01.vm.box = "centos/stream9"
+    app01.vm.hostname = "app01"
+    app01.vm.network "private_network", ip: "192.168.56.12"
+
+    app01.vm.provider :libvirt do |lv|
+      lv.driver = "qemu"
+      lv.memory = 800
+      lv.cpus = 1
+    end
+  end
+
+### Nginx VM ###
   config.vm.define "web01" do |web01|
     web01.vm.box = "bento/ubuntu-24.04"
     web01.vm.hostname = "web01"
-    web01.vm.network "private_network", ip: "192.168.56.41"
-	web01.vm.network "public_network", dev: "wlp2s0"
+    web01.vm.network "private_network", ip: "192.168.56.11"
 
+    web01.vm.provider :libvirt do |lv|
+      lv.driver = "qemu"
+      lv.memory = 800
+      lv.cpus = 1
+    end
   end
 
-  # Define web02
-  config.vm.define "web02" do |web02|
-    web02.vm.box = "bento/ubuntu-24.04"
-    web02.vm.hostname = "web02"
-    web02.vm.network "private_network", ip: "192.168.56.42"
-	web02.vm.network "public_network", dev: "wlp2s0"
-  end
-
-  # Define web03
-  config.vm.define "web03" do |web03|
-    web03.vm.box = "bento/ubuntu-24.04"
-    web03.vm.hostname = "web03"  # Fixed hostname from web02 to web03
-    web03.vm.network "private_network", ip: "192.168.56.43"
-	web03.vm.network "public_network", dev: "wlp2s0"
-  end
-
-  # Define db01
-  config.vm.define "db01" do |db01|
-    db01.vm.box = "eurolinux-vagrant/centos-stream-9"
-    db01.vm.hostname = "db01"
-    db01.vm.network "private_network", ip: "192.168.56.44"
-	db01.vm.network "public_network", dev: "wlp2s0"
-    db01.vm.provision "shell", inline: <<-SHELL
-      yum install -y wget unzip mariadb-server
-      systemctl start mariadb
-      systemctl enable mariadb
-      # Additional provisioning steps for db01
-    SHELL
-  end
 end
+
