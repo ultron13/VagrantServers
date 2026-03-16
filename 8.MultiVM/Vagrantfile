@@ -1,0 +1,52 @@
+Vagrant.configure("2") do |config|
+  # Set up Libvirt provider settings
+  config.vm.provider "libvirt" do |libvirt|
+    libvirt.driver = "qemu"  # Force software emulation
+    libvirt.nic_model_type = "virtio"  # Use virtio network interface
+	  libvirt.memory = 1600
+    libvirt.cpus   = 2
+  end
+
+  # Enable host manager settings
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+
+  # Define web01
+  config.vm.define "web01" do |web01|
+    web01.vm.box = "bento/ubuntu-24.04"
+    web01.vm.hostname = "web01"
+    web01.vm.network "private_network", ip: "192.168.56.41"
+	web01.vm.network "public_network", dev: "wlp2s0"
+
+  end
+
+  # Define web02
+  config.vm.define "web02" do |web02|
+    web02.vm.box = "bento/ubuntu-24.04"
+    web02.vm.hostname = "web02"
+    web02.vm.network "private_network", ip: "192.168.56.42"
+	web02.vm.network "public_network", dev: "wlp2s0"
+  end
+
+  # Define web03
+  config.vm.define "web03" do |web03|
+    web03.vm.box = "bento/ubuntu-24.04"
+    web03.vm.hostname = "web03"  # Fixed hostname from web02 to web03
+    web03.vm.network "private_network", ip: "192.168.56.43"
+	web03.vm.network "public_network", dev: "wlp2s0"
+  end
+
+  # Define db01
+  config.vm.define "db01" do |db01|
+    db01.vm.box = "eurolinux-vagrant/centos-stream-9"
+    db01.vm.hostname = "db01"
+    db01.vm.network "private_network", ip: "192.168.56.44"
+	db01.vm.network "public_network", dev: "wlp2s0"
+    db01.vm.provision "shell", inline: <<-SHELL
+      yum install -y wget unzip mariadb-server
+      systemctl start mariadb
+      systemctl enable mariadb
+      # Additional provisioning steps for db01
+    SHELL
+  end
+end
