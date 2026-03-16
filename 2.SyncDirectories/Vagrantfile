@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+  # Use a known-good Ubuntu box with Libvirt provider
+  config.vm.box = "bento/ubuntu-24.04"
+
+  # SSH settings
+  config.ssh.username = "vagrant"
+  config.ssh.insert_key = false
+  config.vm.boot_timeout = 600   # allow extra time for boot
+
+  # Libvirt provider settings
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.driver = "qemu"           # force software emulation
+    libvirt.nic_model_type = "virtio"  # safer NIC type
+    libvirt.memory = 800
+    libvirt.cpus = 2
+  end
+end
